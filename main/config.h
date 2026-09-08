@@ -2,12 +2,13 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define MODULE_ID "ESP32miniBT_v0.3.7"
+#define MODULE_ID "ESP32miniBT_v0.4.0"
 
 #if CONFIG_USE_AS_FLIPMOUSE_FABI
   //this will be overwritten by FABI/FLipMouse/FLipPad firmware to correct
   //name, this is the BT device name for the first start
-  #define GATTS_TAG "AsTeRICS Foundation Module"
+  //09.2026: we use this project for FM3 mostly (FABI is Pico2W, FLipPad should overwrite), set this name to FM per default
+  #define GATTS_TAG "FM3"
 //non FM/FP/FABI boards
 #else 
 	#define EX_UART_NUM     	 CONFIG_MODULE_UART_NR

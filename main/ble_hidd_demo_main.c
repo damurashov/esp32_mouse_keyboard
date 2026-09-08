@@ -223,8 +223,10 @@ EventGroupHandle_t eventgroup_system;
 
 static esp_ble_adv_data_t hidd_adv_data = {
     .set_scan_rsp = false,
+    //it's always that crappy iOS stuff:
+    //09.2026->include name & include TX power set to false, otherwise it is not found at all (but works on every other platform)
     .include_name = true,
-    .include_txpower = true,
+    .include_txpower = false,
     .min_interval = 0x000A, //slave connection min interval, Time = min_interval * 1.25 msec
     .max_interval = 0x0010, //slave connection max interval, Time = max_interval * 1.25 msec
     /** @note: HID generic appearance does not work on some iOS/Amazon FireTV Sticks, see https://github.com/asterics/esp32_mouse_keyboard/issues/52 */
@@ -504,7 +506,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         esp_ble_gap_cb_param_t *scan_result = (esp_ble_gap_cb_param_t *)param;
         switch (scan_result->scan_rst.search_evt) {
 			case ESP_GAP_SEARCH_INQ_RES_EVT:
-				//esp_log_buffer_hex(HID_DEMO_TAG, scan_result->scan_rst.bda, 6);
+				//ESP_LOG_BUFFER_HEX_LEVEL(HID_DEMO_TAG, scan_result->scan_rst.bda, 6, ESP_LOG_INFO);
 				//ESP_LOGI(HID_DEMO_TAG, "Searched Adv Data Len %d, Scan Response Len %d", scan_result->scan_rst.adv_data_len, scan_result->scan_rst.scan_rsp_len);
 				adv_name = esp_ble_resolve_adv_data(scan_result->scan_rst.ble_adv, ESP_BLE_AD_TYPE_NAME_CMPL, &adv_name_len);
 				if(adv_name_len == 0) adv_name = esp_ble_resolve_adv_data(scan_result->scan_rst.ble_adv, ESP_BLE_AD_TYPE_NAME_SHORT, &adv_name_len);
@@ -513,8 +515,8 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 				//ESP_LOGI(HID_DEMO_TAG, "\n");
 				if (adv_name != NULL) {
 					//store name to BT addr...
-					esp_log_buffer_hex(HID_DEMO_TAG, scan_result->scan_rst.bda, 6);
-					esp_log_buffer_char(HID_DEMO_TAG, adv_name, adv_name_len);
+					ESP_LOG_BUFFER_HEX_LEVEL(HID_DEMO_TAG, scan_result->scan_rst.bda, 6, ESP_LOG_DEBUG);
+					ESP_LOG_BUFFER_HEX_LEVEL(HID_DEMO_TAG, adv_name, adv_name_len, ESP_LOG_DEBUG);
 					adv_name[adv_name_len] = '\0';
 					char key[13];
 					sprintf(key,"%02X%02X%02X%02X%02X%02X",scan_result->scan_rst.bda[0],scan_result->scan_rst.bda[1], \
@@ -788,7 +790,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 			{
 				//print on monitor & external uart
 				if(cmdBuffer->sendToUART != 0) uart_write_bytes(ext_uart_num, "CONNECTED:",strlen("CONNECTED:"));
-				esp_log_buffer_hex(EXT_UART_TAG, active_connections[i], sizeof(esp_bd_addr_t));
+				ESP_LOG_BUFFER_HEX_LEVEL(EXT_UART_TAG, active_connections[i], sizeof(esp_bd_addr_t), ESP_LOG_INFO);
 				for (int t=0; t<sizeof(esp_bd_addr_t); t++) {
 					sprintf(hexnum,"%02X ",active_connections[i][t]);
 					if(cmdBuffer->sendToUART != 0) uart_write_bytes(ext_uart_num, hexnum, 3);
@@ -814,7 +816,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 				if(input[i*2+1+3] >= 'a' && input[i*2+1+3] <= 'f') newaddr[i] |= input[i*2+1+3] + 10 - 'a';
 				if(input[i*2+1+3] >= 'A' && input[i*2+1+3] <= 'F') newaddr[i] |= input[i*2+1+3] + 10 - 'A';
 			}
-			esp_log_buffer_hex(HID_DEMO_TAG, newaddr, 6);
+			ESP_LOG_BUFFER_HEX_LEVEL(HID_DEMO_TAG, newaddr, 6, ESP_LOG_INFO);
 			
 			for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS; i++)
 			{
@@ -900,7 +902,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
                     {
                         //print on monitor & external uart
                         if(cmdBuffer->sendToUART != 0) uart_write_bytes(ext_uart_num, "PAIRING:",strlen("PAIRING:"));
-                        esp_log_buffer_hex(EXT_UART_TAG, btdevlist[i].bd_addr, sizeof(esp_bd_addr_t));
+                        ESP_LOG_BUFFER_HEX_LEVEL(EXT_UART_TAG, btdevlist[i].bd_addr, sizeof(esp_bd_addr_t), ESP_LOG_INFO);
                         for (int t=0; t<sizeof(esp_bd_addr_t); t++) {
                             sprintf(hexnum,"%02X ",btdevlist[i].bd_addr[t]);
                             if(cmdBuffer->sendToUART != 0) uart_write_bytes(ext_uart_num, hexnum, 3);
@@ -1204,7 +1206,7 @@ void uart_external_task(void *pvParameters)
         ESP_LOGE(EXT_UART_TAG,"external UART set pin failed");
       }
     #endif
-    uart_driver_install(ext_uart_num, UART_FIFO_LEN * 2, UART_FIFO_LEN * 2, 0, NULL, 0);
+    uart_driver_install(ext_uart_num, UART_HW_FIFO_LEN(ext_uart_num) * 2, UART_HW_FIFO_LEN(ext_uart_num) * 2, 0, NULL, 0);
 
     ESP_LOGI(EXT_UART_TAG,"external UART processing task started");
     cmdBuffer.state=CMDSTATE_IDLE;
@@ -1266,7 +1268,7 @@ void uart_console_task(void *pvParameters)
     #endif
 
     //Install UART driver, and get the queue.
-    uart_driver_install(CONSOLE_UART_NUM, UART_FIFO_LEN * 2, UART_FIFO_LEN * 2, 0, NULL, 0);
+    uart_driver_install(CONSOLE_UART_NUM, UART_HW_FIFO_LEN(CONSOLE_UART_NUM) * 2, UART_HW_FIFO_LEN(CONSOLE_UART_NUM) * 2, 0, NULL, 0);
 
     ESP_LOGI("UART","console UART processing task started");
 
@@ -1610,11 +1612,11 @@ void app_main(void)
     //if(esp_ble_gap_set_scan_params(&scan_params) != ESP_OK) ESP_LOGE("MAIN","Cannot set scan params");
     //a console for HID debugging (sending simple mouse/kbd commands) is not available on Arduino RP2040 Connect.
     #if CONFIG_MODULE_MINIBT
-      xTaskCreate(&uart_console_task,  "console", 4096, NULL, configMAX_PRIORITIES, NULL);
+      xTaskCreate(&uart_console_task,  "console", 4096, NULL, configMAX_PRIORITIES-1, NULL);
     #endif
-    xTaskCreate(&uart_external_task, "external", 4096, NULL, configMAX_PRIORITIES, NULL);
+    xTaskCreate(&uart_external_task, "external", 4096, NULL, configMAX_PRIORITIES-1, NULL);
     ///@todo maybe reduce stack size for blink task? 4k words for blinky :-)?
-    xTaskCreate(&blink_task, "blink", 4096, NULL, configMAX_PRIORITIES, NULL);
+    xTaskCreate(&blink_task, "blink", 4096, NULL, configMAX_PRIORITIES-1, NULL);
     
     //start periodic timer to send HID reports
     const esp_timer_create_args_t periodic_timer_args = {
