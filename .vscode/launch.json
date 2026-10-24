@@ -1,0 +1,84 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flash",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/esp32_mouse_keyboard.elf",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/home/dm/.espressif/tools/xtensa-esp-elf-gdb/17.1_20260402/xtensa-esp-elf-gdb/bin/xtensa-esp32s3-elf-gdb",
+            "miDebuggerServerAddress": "localhost:3333",
+            "stopAtEntry": true,
+            "externalConsole": false,
+            "postRemoteConnectCommands": [
+                {
+                    "description": "Halt target",
+                    // "text": "-interpreter-exec console \"monitor reset halt\"",
+                    "text": "monitor halt",
+                    "ignoreFailures": false
+                },
+                {
+                    "text": "file ${workspaceFolder}/build/esp32_mouse_keyboard.elf"
+                },
+                {
+                    "text": "mon program build/esp32_mouse_keyboard.bin 0x10000"
+                },
+                {
+                    "description": "Reset-halt target",
+                    // "text": "-interpreter-exec console \"monitor reset halt\"",
+                    "text": "monitor reset halt",
+                    "ignoreFailures": false
+                },
+            ],
+            "setupCommands": [
+                {
+                    "description": "enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignorefailures": true
+                },
+                {
+                    "description": "Set disassembly flavor to intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Attach",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/esp32_mouse_keyboard.elf",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/home/dm/.espressif/tools/xtensa-esp-elf-gdb/17.1_20260402/xtensa-esp-elf-gdb/bin/xtensa-esp32s3-elf-gdb",
+            "miDebuggerServerAddress": "localhost:3333",
+            "stopAtEntry": true,
+            "externalConsole": false,
+            "postRemoteConnectCommands": [
+                {
+                    "description": "Reset-halt target",
+                    // "text": "-interpreter-exec console \"monitor reset halt\"",
+                    "text": "monitor reset halt",
+                    "ignoreFailures": false
+                }
+            ],
+            "setupCommands": [
+                {
+                    "description": "enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignorefailures": true
+                },
+                {
+                    "description": "Set disassembly flavor to intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+    ]
+}
