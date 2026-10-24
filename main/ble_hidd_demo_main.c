@@ -16,9 +16,9 @@
  *
  * Copyright 2023:
  * Benjamin Aigner <beni@asterics-foundation.org>,<aignerb@technikum-wien.at>
- * 
+ *
  * Copyright 2020-2021:
- * Benjamin Aigner <beni@asterics-foundation.org>,<aignerb@technikum-wien.at>, 
+ * Benjamin Aigner <beni@asterics-foundation.org>,<aignerb@technikum-wien.at>,
  * Junaid Khan <junaid.khan.wien@gmail.com>
  *
  * This file is mostly based on the Espressif ESP32 BLE HID example.
@@ -104,18 +104,18 @@
 #endif
 
 /** @brief NVS handle to resolve BT addr to name
- * 
+ *
  * In NVS, we store the BT addr as key and the name as value. */
 nvs_handle nvs_bt_name_h;
 
 /** @brief NVS handle to store key/value pairs via UART
- * 
+ *
  * In NVS, we store arbitrary values, which are sent via UART.
  * This can(will) be used for storing different values from the
  * GUI on the ESP32. */
 nvs_handle nvs_storage_h;
 
-/** Timestamp of last sent HID packet, used for idle sending timer callback 
+/** Timestamp of last sent HID packet, used for idle sending timer callback
  * @see periodicHIDCallback */
 uint64_t timestampLastSent;
 
@@ -377,7 +377,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
         break;
     case ESP_HIDD_EVENT_BLE_CONNECT: {
         ESP_LOGI(HID_DEMO_TAG, "ESP_HIDD_EVENT_BLE_CONNECT");
-        
+
         for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS;i++)
         {
 			if(active_hid_conn_ids[i] == -1) //search for the first unused slot
@@ -388,7 +388,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
 				break;
 			}
 		}
-		
+
 		//because some devices do connect with a quite high connection
 		//interval, we might have a congested channel...
 		//to overcome this issue, we update the connection parameters here
@@ -400,7 +400,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
 		new.latency = 0;
 		new.timeout = 500;
 		esp_ble_gap_update_conn_params(&new);
-        
+
         //to allow more connections, we simply restart the adv process.
         esp_ble_gap_start_advertising(&hidd_adv_params);
         //xEventGroupClearBits(eventgroup_system,SYSTEM_CURRENTLY_ADVERTISING);
@@ -419,7 +419,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
 				break;
 			}
 		}
-				
+
         ESP_LOGI(HID_DEMO_TAG, "ESP_HIDD_EVENT_BLE_DISCONNECT");
         esp_ble_gap_start_advertising(&hidd_adv_params);
         xEventGroupSetBits(eventgroup_system,SYSTEM_CURRENTLY_ADVERTISING);
@@ -436,7 +436,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
         break;
     }
     */
-    
+
     case ESP_HIDD_EVENT_BLE_CONGEST: {
 		if(param->congest.congested)
 		{
@@ -499,7 +499,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 #endif
 		}
         break;
-    //handle scan responses here...    
+    //handle scan responses here...
 	case ESP_GAP_BLE_SCAN_RESULT_EVT: {
 		uint8_t *adv_name = NULL;
 	    uint8_t adv_name_len = 0;
@@ -532,10 +532,10 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 			default:
 				break;
         }
-        
+
 		}
         break;
-        
+
     case ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:
         //scan start complete event to indicate scan start successfully or failed
         if (param->scan_start_cmpl.status != ESP_BT_STATUS_SUCCESS) {
@@ -544,7 +544,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         }
         ESP_LOGI(HID_DEMO_TAG, "Scan start success");
         break;
-		
+
     default:
         break;
     }
@@ -577,7 +577,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
   esp_ble_bond_dev_t * btdevlist;
   int counter;
   esp_err_t ret;
-  
+
   #if CONFIG_MODULE_USEJOYSTICK
   /**++++ (de-)activate joystick ++++*/
   if(strncmp(input,"JP",2) == 0)
@@ -587,7 +587,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
     else config.joystick_active = 0;
     update_config();
     ESP_LOGI(EXT_UART_TAG,"new joystick state: %d, will show on next reboot", config.joystick_active);
-    if(cmdBuffer->sendToUART != 0) 
+    if(cmdBuffer->sendToUART != 0)
     {
       uart_write_bytes(ext_uart_num, "JS:",strlen("JS:"));
       if(joystate) uart_write_bytes(ext_uart_num, "1",1);
@@ -597,7 +597,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
     return;
   }
   #endif
-    
+
   /**++++ set BLE appearance ++++*/
   if(strncmp(input,"AP", 2) == 0)
   {
@@ -607,7 +607,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
       ESP_LOGI(EXT_UART_TAG,"setting appearance to NVS, will show on next reboot");
       nvs_set_u8(nvs_storage_h,"BLEAPPEAR",appv);
 			nvs_commit(nvs_storage_h);
-      if(cmdBuffer->sendToUART != 0) 
+      if(cmdBuffer->sendToUART != 0)
       {
         uart_write_bytes(ext_uart_num, "AP:",strlen("AP:"));
         uart_write_bytes(ext_uart_num, &input[2],1);
@@ -615,7 +615,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
       }
     } else {
       ESP_LOGE(EXT_UART_TAG,"Cannot set appearance, value not correct. Use AP0 - AP4");
-      if(cmdBuffer->sendToUART != 0) 
+      if(cmdBuffer->sendToUART != 0)
       {
         uart_write_bytes(ext_uart_num, "AP:invalid number, AP0-AP4",strlen("AP:invalid number, AP0-AP4"));
         uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
@@ -623,12 +623,12 @@ void processCommand(struct cmdBuf *cmdBuffer)
     }
     return;
   }
-	
+
 	/**++++en-/disable logging++++*/
 	if(strcmp(input,"LG0") == 0)
     {
 		esp_log_level_set("*",ESP_LOG_ERROR);
-		if(cmdBuffer->sendToUART != 0) 
+		if(cmdBuffer->sendToUART != 0)
 		{
 			uart_write_bytes(ext_uart_num, "LOG:0",strlen("LOG:0"));
 			uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
@@ -638,7 +638,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 	if(strcmp(input,"LG1") == 0)
     {
 		esp_log_level_set("*",ESP_LOG_INFO);
-		if(cmdBuffer->sendToUART != 0) 
+		if(cmdBuffer->sendToUART != 0)
 		{
 			uart_write_bytes(ext_uart_num, "LOG:1",strlen("LOG:1"));
 			uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
@@ -648,14 +648,14 @@ void processCommand(struct cmdBuf *cmdBuffer)
 	if(strcmp(input,"LG2") == 0)
     {
 		esp_log_level_set("*",ESP_LOG_DEBUG);
-		if(cmdBuffer->sendToUART != 0) 
+		if(cmdBuffer->sendToUART != 0)
 		{
 			uart_write_bytes(ext_uart_num, "LOG:2",strlen("LOG:2"));
 			uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
 		}
 		return;
 	}
-	
+
 	/**++++ key/value storing ++++*/
 	if(strncmp(input,"CV ", 2) == 0)
 	{
@@ -666,7 +666,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 		//commit NVS storage
 		ret = nvs_commit(nvs_storage_h);
 		ESP_LOGI(EXT_UART_TAG,"cleared all NVS key/value pairs");
-		if(cmdBuffer->sendToUART != 0) 
+		if(cmdBuffer->sendToUART != 0)
 		{
 			uart_write_bytes(ext_uart_num, "NVS:OK",strlen("NVS:OK"));
 			uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
@@ -680,12 +680,12 @@ void processCommand(struct cmdBuf *cmdBuffer)
 		strsep(&work, " ");
 		//get key
 		char *key = strsep(&work, " ");
-		
+
 		//get data size from NVS, check if key is set
 		size_t sizeData;
 		char* nvspayload = NULL;
 		ret = nvs_get_str(nvs_storage_h, key,NULL,&sizeData);
-		
+
 		//if we have a data length, load string
 		if(ret == ESP_OK)
 		{
@@ -693,13 +693,13 @@ void processCommand(struct cmdBuf *cmdBuffer)
 			nvspayload = malloc(sizeData);
 			ret = nvs_get_str(nvs_storage_h, key, nvspayload, &sizeData);
 		}
-		
+
 		//OK or error?
 		if(ret != ESP_OK)
 		{
 			//send back error message
 			ESP_LOGI(EXT_UART_TAG,"error reading value: %s",esp_err_to_name(ret));
-			if(cmdBuffer->sendToUART != 0) 
+			if(cmdBuffer->sendToUART != 0)
 			{
 				uart_write_bytes(ext_uart_num, "NVS:",strlen("NVS:"));
 				uart_write_bytes(ext_uart_num, esp_err_to_name(ret), strlen(esp_err_to_name(ret)));
@@ -711,12 +711,12 @@ void processCommand(struct cmdBuf *cmdBuffer)
 			uart_write_bytes(ext_uart_num, nvspayload, strlen(nvspayload));
 			uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
 		}
-		
+
 		//done with the payload
 		if(nvspayload) free(nvspayload);
 		return;
 	}
-	
+
 	if(strncmp(input,"SV ", 3) == 0)
 	{
 		char* work = (char*)cmdBuffer->buf;
@@ -726,32 +726,32 @@ void processCommand(struct cmdBuf *cmdBuffer)
 		char* key = strsep(&work, " ");
 		//get payload
 		char* nvspayload = work;
-		
+
 		if(work == NULL)
 		{
 			ESP_LOGI(EXT_UART_TAG,"error setting string: no value provided");
-			if(cmdBuffer->sendToUART != 0) 
+			if(cmdBuffer->sendToUART != 0)
 			{
 				uart_write_bytes(ext_uart_num, "NVS:ESP_ERR_NVS_NO_VALUE",strlen("NVS:ESP_ERR_NVS_NO_VALUE"));
 				uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
 			}
 			return;
 		}
-		
+
 		//try to set string data to nvs
 		ret = nvs_set_str(nvs_storage_h, key,nvspayload);
-		
+
 		if(ret == ESP_OK)
 		{
 			//commit NVS storage
 			ret = nvs_commit(nvs_storage_h);
 		}
-		
+
 		if(ret != ESP_OK)
 		{
 			//send back error message
 			ESP_LOGI(EXT_UART_TAG,"error setting string: %s",esp_err_to_name(ret));
-			if(cmdBuffer->sendToUART != 0) 
+			if(cmdBuffer->sendToUART != 0)
 			{
 				uart_write_bytes(ext_uart_num, "NVS:",strlen("NVS:"));
 				uart_write_bytes(ext_uart_num, esp_err_to_name(ret), strlen(esp_err_to_name(ret)));
@@ -762,7 +762,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 			nvs_stats_t nvs_stats;
 			nvs_get_stats(NULL, &nvs_stats);
 			ESP_LOGI(EXT_UART_TAG,"set - %s:%s - used:%d,free:%d",key,nvspayload,nvs_stats.used_entries, nvs_stats.free_entries);
-			if(cmdBuffer->sendToUART != 0) 
+			if(cmdBuffer->sendToUART != 0)
 			{
 				uart_write_bytes(ext_uart_num, "NVS:OK ", strlen("NVS:OK "));
 				char stats[64];
@@ -784,7 +784,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 		for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS; i++)
 		{
 			esp_bd_addr_t empty = {0,0,0,0,0,0};
-			
+
 			//only select active connections
 			if(memcmp(active_connections[i],empty,sizeof(esp_bd_addr_t)) != 0)
 			{
@@ -801,7 +801,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 		ESP_LOGI(EXT_UART_TAG,"---------------------------------------");
 		return;
 	}
-    //switch between BT devices which are connected... 
+    //switch between BT devices which are connected...
     if(input[0] == 'S' && input[1] == 'W')
     {
 		if(len >= 15)
@@ -811,13 +811,13 @@ void processCommand(struct cmdBuf *cmdBuffer)
 				if(input[i*2+3] >= '0' && input[i*2+3] <= '9') newaddr[i] = (input[i*2+3] - '0')<<4;
 				if(input[i*2+3] >= 'a' && input[i*2+3] <= 'f') newaddr[i] = (input[i*2+3] + 10 - 'a')<<4;
 				if(input[i*2+3] >= 'A' && input[i*2+3] <= 'F') newaddr[i] = (input[i*2+3] + 10 - 'A')<<4;
-				
+
 				if(input[i*2+1+3] >= '0' && input[i*2+1+3] <= '9') newaddr[i] |= input[i*2+1+3] - '0';
 				if(input[i*2+1+3] >= 'a' && input[i*2+1+3] <= 'f') newaddr[i] |= input[i*2+1+3] + 10 - 'a';
 				if(input[i*2+1+3] >= 'A' && input[i*2+1+3] <= 'F') newaddr[i] |= input[i*2+1+3] + 10 - 'A';
 			}
 			ESP_LOG_BUFFER_HEX_LEVEL(HID_DEMO_TAG, newaddr, 6, ESP_LOG_INFO);
-			
+
 			for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS; i++)
 			{
 				//check if this addr is in the array
@@ -834,8 +834,8 @@ void processCommand(struct cmdBuf *cmdBuffer)
 		}
 		return;
 	}
-    
-    
+
+
     //get module ID
     if(strcmp(input,"ID") == 0)
     {
@@ -913,7 +913,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
                         char key[13];
                         sprintf(key,"%02X%02X%02X%02X%02X%02X",btdevlist[i].bd_addr[0],btdevlist[i].bd_addr[1], \
 							btdevlist[i].bd_addr[2],btdevlist[i].bd_addr[3],btdevlist[i].bd_addr[4],btdevlist[i].bd_addr[5]);
-                        
+
                         if(nvs_get_str(nvs_bt_name_h,key,btname,&name_len) == ESP_OK)
                         {
 							sprintf(hexnum," - ");
@@ -921,7 +921,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 							if(cmdBuffer->sendToUART != 0) uart_write_bytes(ext_uart_num, btname, name_len);
 							ESP_LOGI(EXT_UART_TAG,"%s",btname);
 						} else ESP_LOGW(EXT_UART_TAG,"cannot find name for addr.");
-                        
+
                         if(cmdBuffer->sendToUART != 0) uart_write_bytes(ext_uart_num,nl,sizeof(nl)); //newline
                     }
                     ESP_LOGI(EXT_UART_TAG,"---------------------------------------");
@@ -974,7 +974,7 @@ void processCommand(struct cmdBuf *cmdBuffer)
 						{
 							esp_ble_remove_bond_device(btdevlist[i].bd_addr);
 		                    esp_ble_gap_update_whitelist(false,btdevlist[i].bd_addr,BLE_WL_ADDR_TYPE_PUBLIC);
-		                    esp_ble_gap_update_whitelist(false,btdevlist[i].bd_addr,BLE_WL_ADDR_TYPE_RANDOM); 
+		                    esp_ble_gap_update_whitelist(false,btdevlist[i].bd_addr,BLE_WL_ADDR_TYPE_RANDOM);
 						}
 					}
                 } else ESP_LOGI(EXT_UART_TAG,"error getting device list");
@@ -1078,7 +1078,7 @@ void uart_parse_command (uint8_t character, struct cmdBuf * cmdBuffer)
             } else {
               esp_hidd_send_keyboard_value(hid_conn_id,cmdBuffer->buf[0],&cmdBuffer->buf[2],6);
             }
-                    
+
               //update timestamp
               timestampLastSent = esp_timer_get_time();
           } else if (cmdBuffer->buf[1] == 0x01) {  // joystick report
@@ -1147,7 +1147,7 @@ void uart_external_task(void *pvParameters)
       /*   we enable the RX pin as GPIO with pull-down.
        * 	 if "1" is read, this is the "real" RX pin. If not, it
        *   should be the TX pin. */
-      
+
       gpio_config_t io_conf;
       //disable interrupt
       io_conf.intr_type = GPIO_INTR_DISABLE;
@@ -1161,9 +1161,9 @@ void uart_external_task(void *pvParameters)
       io_conf.pull_up_en = 0;
       //configure GPIO with the given settings
       gpio_config(&io_conf);
-      
+
       vTaskDelay(1);
-      
+
       if(!gpio_get_level(ext_uart_rx))
       {
         ESP_LOGW(EXT_UART_TAG,"Switching pins!");
@@ -1185,11 +1185,11 @@ void uart_external_task(void *pvParameters)
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
         .source_clk = UART_SCLK_DEFAULT,
     };
-    
+
     #if CONFIG_MODULE_NANO
       uart_config.baud_rate = 115200;
     #endif
-    
+
     //update UART config
     ret = uart_param_config(ext_uart_num, &uart_config);
     if(ret != ESP_OK)
@@ -1228,7 +1228,7 @@ void blink_task(void *pvParameter)
     int blinkTime;
 
     while(1) {
-		
+
         if (isConnected()) blinkTime=1000;
         else blinkTime=250;
 
@@ -1451,7 +1451,7 @@ void uart_console_task(void *pvParameters)
 void app_main(void)
 {
     esp_err_t ret;
-    
+
     //set external UART number according to setup
     //and setup anything pin related.
     #if CONFIG_USE_AS_FLIPMOUSE_FABI
@@ -1529,17 +1529,17 @@ void app_main(void)
     if((ret = esp_hidd_profile_init()) != ESP_OK) {
         ESP_LOGE(HID_DEMO_TAG, "%s init bluedroid failed\n", __func__);
     }
-    
+
     //open NVS handle for storing BT device names
     ESP_LOGI("MAIN","opening NVS handle for BT names");
     ret = nvs_open("btnames", NVS_READWRITE, &nvs_bt_name_h);
     if(ret != ESP_OK) ESP_LOGE("MAIN","error opening NVS for bt names");
-    
+
     //open NVS handle for key/value storage via UART
     ESP_LOGI("MAIN","opening NVS handle for key/value storage");
     ret = nvs_open("kvstorage", NVS_READWRITE, &nvs_storage_h);
     if(ret != ESP_OK) ESP_LOGE("MAIN","error opening NVS for key/value storage");
-    
+
     //read the appearance value for advertising
     uint8_t advapp;
     ret = nvs_get_u8(nvs_storage_h,"BLEAPPEAR",&advapp);
@@ -1548,7 +1548,7 @@ void app_main(void)
       ESP_LOGI("MAIN","Setting appearance to 0x03C%d",advapp);
       hidd_adv_data.appearance = 0x03C0 + advapp;
     }
-    
+
     // Read config
     nvs_handle my_handle;
     ESP_LOGI("MAIN","loading configuration from NVS");
@@ -1569,7 +1569,7 @@ void app_main(void)
     nvs_get_u8(my_handle, "joyactive", &config.joystick_active);
     ESP_LOGI("MAIN","Joystick: %d",config.joystick_active);
     #endif
-    
+
     //get locale
     ret = nvs_get_u8(my_handle, "locale", &config.locale);
     //if(ret != ESP_OK || config.locale >= LAYOUT_MAX)
@@ -1581,7 +1581,7 @@ void app_main(void)
     } else ESP_LOGI("MAIN","locale code is : %d",config.locale);
     nvs_close(my_handle);
     ///@todo How to handle the locale here? We have the memory for full lookups on the ESP32, but how to communicate this with the Teensy?
-    
+
     ///clear the HID connection IDs&MACs
     for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS;i++)
     {
@@ -1607,7 +1607,7 @@ void app_main(void)
     and the init key means which key you can distribute to the slave. */
     esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, sizeof(uint8_t));
     esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t));
-    
+
     //start active scan
     //if(esp_ble_gap_set_scan_params(&scan_params) != ESP_OK) ESP_LOGE("MAIN","Cannot set scan params");
     //a console for HID debugging (sending simple mouse/kbd commands) is not available on Arduino RP2040 Connect.
@@ -1615,9 +1615,7 @@ void app_main(void)
       xTaskCreate(&uart_console_task,  "console", 4096, NULL, configMAX_PRIORITIES-1, NULL);
     #endif
     xTaskCreate(&uart_external_task, "external", 4096, NULL, configMAX_PRIORITIES-1, NULL);
-    ///@todo maybe reduce stack size for blink task? 4k words for blinky :-)?
-    xTaskCreate(&blink_task, "blink", 4096, NULL, configMAX_PRIORITIES-1, NULL);
-    
+
     //start periodic timer to send HID reports
     const esp_timer_create_args_t periodic_timer_args = {
             .callback = &periodicHIDCallback,
@@ -1628,7 +1626,7 @@ void app_main(void)
     esp_timer_create(&periodic_timer_args, &periodic_timer);
     //call every 100ms
     esp_timer_start_periodic(periodic_timer, 100000);
-    
+
     //avoid unused variable warnings here:
     (void)hidd_adv_resp;
     (void)scan_params;
