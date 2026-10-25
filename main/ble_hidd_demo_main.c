@@ -1190,6 +1190,11 @@ void uart_external_task(void *pvParameters)
       uart_config.baud_rate = 115200;
     #endif
 
+    if (uart_driver_install(ext_uart_num, 1024, 1024, 0, NULL, 0) != ESP_OK)
+    {
+        ESP_LOGE(EXT_UART_TAG, "Failed to install driver");
+    }
+
     //update UART config
     ret = uart_param_config(ext_uart_num, &uart_config);
     if(ret != ESP_OK)
@@ -1206,17 +1211,24 @@ void uart_external_task(void *pvParameters)
         ESP_LOGE(EXT_UART_TAG,"external UART set pin failed");
       }
     #endif
-    uart_driver_install(ext_uart_num, UART_HW_FIFO_LEN(ext_uart_num) * 2, UART_HW_FIFO_LEN(ext_uart_num) * 2, 0, NULL, 0);
+
+    if (uart_set_pin(UART_NUM_0, 43, 44, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK)
+    {
+        ESP_LOGE(EXT_UART_TAG,"Failed to set UART pins");
+    }
 
     ESP_LOGI(EXT_UART_TAG,"external UART processing task started");
     cmdBuffer.state=CMDSTATE_IDLE;
     cmdBuffer.sendToUART = 1;
+    uart_write_bytes(ext_uart_num, "Console...\r\n", 11);
 
     while(1)
     {
         // read & process a single byte
-        uart_read_bytes(ext_uart_num, (uint8_t*) &character, 1, portMAX_DELAY);
-        uart_parse_command(character, &cmdBuffer);
+        if (uart_read_bytes(ext_uart_num, (uint8_t*) &character, 1, 1) > 0)
+        {
+            uart_parse_command(character, &cmdBuffer);
+        }
     }
 }
 
