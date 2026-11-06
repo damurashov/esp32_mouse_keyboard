@@ -10,15 +10,10 @@
   //09.2026: we use this project for FM3 mostly (FABI is Pico2W, FLipPad should overwrite), set this name to FM per default
   #define GATTS_TAG "FM3"
 //non FM/FP/FABI boards
-#else 
+#else
 	#define EX_UART_NUM     	 CONFIG_MODULE_UART_NR
 	#define GATTS_TAG "esp32_mouse_keyboard"
-	// indicator LED
-	#define INDICATOR_LED_PIN    CONFIG_MODULE_LED_PIN
-	#define EX_SERIAL_TXPIN      CONFIG_MODULE_TX_PIN
-	#define EX_SERIAL_RXPIN      CONFIG_MODULE_RX_PIN
 #endif
-
 
 #define MAX_BT_DEVICENAME_LENGTH 40
 
