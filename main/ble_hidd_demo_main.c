@@ -272,6 +272,8 @@ static esp_ble_adv_params_t hidd_adv_params = {
     .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
 };
 
+static void on_thumbwheel(int32_t offset);
+
 uint8_t uppercase(uint8_t c)
 {
     if ((c>='a') && (c<='z')) return (c-'a'+'A');
@@ -1041,34 +1043,14 @@ void processCommand(struct cmdBuf *cmdBuffer)
 
     if(strcmp(input,"WHEELUP") == 0)
     {
-        if(hid_conn_id == -1)
-        {
-            for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS; i++)
-            {
-                if(active_hid_conn_ids[i] != -1) esp_hidd_send_mouse_value(active_hid_conn_ids[i], 0, 0, 0, 1);
-            }
-        } else {
-            esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 1);
-        }
-        //update timestamp
-        timestampLastSent = esp_timer_get_time();
+        on_thumbwheel(1);
         ESP_LOGW(EXT_UART_TAG,"Moved the wheel up");
         return;
     }
 
     if(strcmp(input,"WHEELDOWN") == 0)
     {
-        if(hid_conn_id == -1)
-        {
-            for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS; i++)
-            {
-                if(active_hid_conn_ids[i] != -1) esp_hidd_send_mouse_value(active_hid_conn_ids[i], 0, 0, 0, -1);
-            }
-        } else {
-            esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, -1);
-        }
-        //update timestamp
-        timestampLastSent = esp_timer_get_time();
+        on_thumbwheel(-1);
         ESP_LOGW(EXT_UART_TAG,"Moved the wheel down");
         return;
     }
@@ -1498,6 +1480,29 @@ void uart_console_task(void *pvParameters)
     }
 }
 
+void on_thumbwheel(int32_t offset)
+{
+    const uint8_t val = (int8_t)(offset > 127 ? 127 :
+        offset < -127 ? -127 :
+        offset);
+    if(hid_conn_id == -1)
+    {
+        for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS; i++)
+        {
+            if(active_hid_conn_ids[i] != -1) esp_hidd_send_mouse_value(active_hid_conn_ids[i], 0, 0, 0, val);
+        }
+    } else {
+        esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, val);
+    }
+    //update timestamp
+    timestampLastSent = esp_timer_get_time();
+}
+
+static void main_loop(void)
+{
+
+}
+
 void app_main(void)
 {
     esp_err_t ret;
@@ -1676,6 +1681,12 @@ void app_main(void)
     esp_timer_create(&periodic_timer_args, &periodic_timer);
     //call every 100ms
     esp_timer_start_periodic(periodic_timer, 100000);
+
+    while (1)
+    {
+        main_loop();
+        vTaskDelay(1);
+    }
 
     //avoid unused variable warnings here:
     (void)hidd_adv_resp;
