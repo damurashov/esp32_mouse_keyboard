@@ -13,37 +13,49 @@
             "MIMode": "gdb",
             "miDebuggerPath": "/home/dm/.espressif/tools/xtensa-esp-elf-gdb/17.1_20260402/xtensa-esp-elf-gdb/bin/xtensa-esp32s3-elf-gdb",
             "miDebuggerServerAddress": "localhost:3333",
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "externalConsole": false,
+            "launchCompleteCommand": "exec-continue",
+
             "postRemoteConnectCommands": [
                 {
-                    "description": "Halt target",
-                    // "text": "-interpreter-exec console \"monitor reset halt\"",
-                    "text": "monitor halt",
-                    "ignoreFailures": false
+                    "description": "Reset and halt",
+                    "text": "monitor reset halt"
+                },
+                {
+                    "description": "Flash firmware",
+                    "text": "monitor program_esp build/esp32_mouse_keyboard.bin 0x10000 verify"
+                },
+                {
+                    "description": "Flush register cache",
+                    "text": "maintenance flush register-cache"
+                },
+                {
+                    "description": "Set breakpoint at app_main",
+                    "text": "thb app_main"
                 },
                 {
                     "text": "file ${workspaceFolder}/build/esp32_mouse_keyboard.elf"
-                },
-                {
-                    "text": "mon program build/esp32_mouse_keyboard.bin 0x10000"
-                },
-                {
-                    "description": "Reset-halt target",
-                    // "text": "-interpreter-exec console \"monitor reset halt\"",
-                    "text": "monitor reset halt",
-                    "ignoreFailures": false
-                },
+                }
+                // {
+                //     "text": "monitor esp32s3.cpu0 configure -rtos FreeRTOS"
+                // }
             ],
+
             "setupCommands": [
                 {
-                    "description": "enable pretty-printing",
+                    "description": "Enable pretty-printing",
                     "text": "-enable-pretty-printing",
-                    "ignorefailures": true
+                    "ignoreFailures": true
                 },
                 {
-                    "description": "Set disassembly flavor to intel",
+                    "description": "Set disassembly flavor",
                     "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Hardware watchpoint limit",
+                    "text": "set remote hardware-watchpoint-limit 2",
                     "ignoreFailures": true
                 }
             ]
