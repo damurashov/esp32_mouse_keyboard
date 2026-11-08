@@ -76,6 +76,7 @@ void mousewheel_init(void)
 
     /* Install ISRs */
 
+    gpio_install_isr_service(0);
     gpio_isr_handler_add(THUMBWHEEL_PIN_ENCODER_A, thumbwheel_isr, (void*)(-1ULL));
     gpio_isr_handler_add(THUMBWHEEL_PIN_ENCODER_B, thumbwheel_isr, (void *)1ULL);
 }
