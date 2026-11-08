@@ -53,7 +53,7 @@ static void thumbwheel_isr(void *arg)
     else
     {
         s_enc.curr_dir = 0;
-        s_enc.acc_dir += (int32_t arg);
+        s_enc.acc_dir += (int32_t)arg;
     }
 }
 
@@ -66,13 +66,13 @@ void mousewheel_init(void)
     /* Init pins */
 
     gpio_config_t io_enc = {
-        .intr_type = GPIO_INTR_POSEDGE,
+        .intr_type = GPIO_INTR_ANYEDGE,
         .mode = GPIO_MODE_INPUT,
         .pin_bit_mask = ((1ULL << THUMBWHEEL_PIN_ENCODER_A) | (1ULL << THUMBWHEEL_PIN_ENCODER_B)),
         .pull_down_en = 0,
         .pull_up_en = 0
     };
-    gpio_config(&io_pwrb);
+    gpio_config(&io_enc);
 
     /* Install ISRs */
 
@@ -84,4 +84,5 @@ int32_t mousewheel_loop(void)
 {
     const int32_t ret = s_enc.acc_dir - s_enc.rept_dir;
     s_enc.rept_dir = s_enc.acc_dir;
+    return ret;
 }
