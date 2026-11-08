@@ -1278,7 +1278,7 @@ void blink_task(void *pvParameter)
 int uart_vprintf_valid = 0;
 vprintf_like_t uart0_vprintf;
 /** a vprintf discard function. used to disable logging */
-int vprintf_discard( const char *str, va_list l )
+int vprintf_discard(const char *str, va_list l)
 {
 	(void)str;
 	(void)l;
@@ -1500,7 +1500,11 @@ void on_thumbwheel(int32_t offset)
 
 static void main_loop(void)
 {
-
+    const int32_t val = mousewheel_loop();
+    if (val)
+    {
+        on_thumbwheel(val);
+    }
 }
 
 void app_main(void)
@@ -1681,6 +1685,8 @@ void app_main(void)
     esp_timer_create(&periodic_timer_args, &periodic_timer);
     //call every 100ms
     esp_timer_start_periodic(periodic_timer, 100000);
+
+    mousewheel_init();
 
     while (1)
     {
