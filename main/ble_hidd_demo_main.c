@@ -45,6 +45,7 @@
 #include "config.h"
 #include "mousewheel.h"
 #include "pinout.h"
+#include "pwr.h"
 #include <driver/gpio.h>
 #include <driver/uart.h>
 #include <esp_bt.h>
@@ -1510,6 +1511,8 @@ static void main_loop(void)
 void app_main(void)
 {
     esp_err_t ret;
+
+    pwr_init();
 
     //set external UART number according to setup
     //and setup anything pin related.
