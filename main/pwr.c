@@ -30,6 +30,12 @@
  * Private Data
  ****************************************************************************/
 
+static struct
+{
+    esp_pm_lock_handle_t sleep_lock;
+    int locked;
+} s_sleep = {};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -38,14 +44,30 @@
  * Private Functions
  ****************************************************************************/
 
-int get_a_encoder_lvl(void)
+static int get_a_encoder_lvl(void)
 {
     return gpio_get_level(THUMBWHEEL_PIN_ENCODER_A);
 }
 
-int get_b_encoder_lvl(void)
+static int get_b_encoder_lvl(void)
 {
     return gpio_get_level(THUMBWHEEL_PIN_ENCODER_B);
+}
+
+static void prevent_sleep(void)
+{
+    if (!s_sleep.locked)
+    {
+        esp_pm_lock_acquire(s_sleep.sleep_lock);
+    }
+}
+
+static void allow_sleep(void)
+{
+    if (s_sleep.locked)
+    {
+        esp_pm_lock_release(s_sleep.sleep_lock);
+    }
 }
 
 /****************************************************************************
@@ -63,6 +85,15 @@ void pwr_init(void)
     };
 
     ESP_ERROR_CHECK(esp_pm_configure(&config));
+    ESP_ERROR_CHECK(
+        esp_pm_lock_create(
+            ESP_PM_NO_LIGHT_SLEEP,
+            0,
+            "no_sleep",
+            &s_sleep.sleep_lock
+        )
+    );
+    prevent_sleep();
 }
 
 void pwr_loop(void)
