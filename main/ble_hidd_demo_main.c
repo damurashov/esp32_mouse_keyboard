@@ -1694,6 +1694,7 @@ void app_main(void)
     while (1)
     {
         main_loop();
+        pwr_loop();
         vTaskDelay(1);
     }
 
