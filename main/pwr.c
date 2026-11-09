@@ -93,11 +93,14 @@ void pwr_init(void)
             &s_sleep.sleep_lock
         )
     );
-    prevent_sleep();
 }
 
 void pwr_loop(void)
 {
+    /* TODO DM This function causes the encoder to become unresponsive. Remove
+     * "return", and get down to it */
+    return;
+
     /* Configure encoder pins for wakeup */
     ESP_ERROR_CHECK(gpio_wakeup_enable(THUMBWHEEL_PIN_ENCODER_A,
         get_a_encoder_lvl() ? GPIO_INTR_LOW_LEVEL : GPIO_INTR_HIGH_LEVEL));
