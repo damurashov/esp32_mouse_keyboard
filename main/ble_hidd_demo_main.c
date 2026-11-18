@@ -1701,7 +1701,7 @@ void app_main(void)
     {
         main_loop();
         pwr_loop();
-        vTaskDelay(1);
+        vTaskDelay(5);
     }
 
     //avoid unused variable warnings here:
