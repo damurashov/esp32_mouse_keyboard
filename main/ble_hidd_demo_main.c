@@ -401,14 +401,15 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
 		//to use a very low connection interval.
 		esp_ble_conn_update_params_t new;
 		memcpy(new.bda,param->connect.remote_bda,sizeof(esp_bd_addr_t));
-		new.min_int = 6;
-		new.max_int = 6;
-		new.latency = 0;
-		new.timeout = 500;
+		new.min_int = 1000;
+		new.max_int = 1000;
+		new.latency = 0x100;
+		new.timeout = 1000;
 		esp_ble_gap_update_conn_params(&new);
 
-        //to allow more connections, we simply restart the adv process.
-        esp_ble_gap_start_advertising(&hidd_adv_params);
+        // We don't need connections anymore. Stop
+        esp_ble_gap_stop_advertising();
+
         //xEventGroupClearBits(eventgroup_system,SYSTEM_CURRENTLY_ADVERTISING);
         break;
     }
