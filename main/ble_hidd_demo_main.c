@@ -1571,6 +1571,11 @@ void app_main(void)
         return;
     }
 
+    /* Set BLE transmit power for various cases (`_N0` means 0 dBm)*/
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_N0);
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_N0);
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_N0);
+
     ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
     if (ret) {
         ESP_LOGE(HID_DEMO_TAG, "%s enable controller failed\n", __func__);
