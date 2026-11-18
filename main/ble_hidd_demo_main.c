@@ -1676,14 +1676,6 @@ void app_main(void)
     esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, sizeof(uint8_t));
     esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t));
 
-    //start active scan
-    //if(esp_ble_gap_set_scan_params(&scan_params) != ESP_OK) ESP_LOGE("MAIN","Cannot set scan params");
-    //a console for HID debugging (sending simple mouse/kbd commands) is not available on Arduino RP2040 Connect.
-    #if CONFIG_MODULE_MINIBT
-      xTaskCreate(&uart_console_task,  "console", 4096, NULL, configMAX_PRIORITIES-1, NULL);
-    #endif
-    xTaskCreate(&uart_external_task, "external", 4096, NULL, configMAX_PRIORITIES-1, NULL);
-
     //start periodic timer to send HID reports
     const esp_timer_create_args_t periodic_timer_args = {
             .callback = &periodicHIDCallback,
