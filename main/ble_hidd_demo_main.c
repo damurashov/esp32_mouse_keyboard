@@ -1684,8 +1684,8 @@ void app_main(void)
     };
     esp_timer_handle_t periodic_timer;
     esp_timer_create(&periodic_timer_args, &periodic_timer);
-    //call every 100ms
-    esp_timer_start_periodic(periodic_timer, 100000);
+    //call every 1000ms
+    esp_timer_start_periodic(periodic_timer, 1000000);
 
     mousewheel_init();
 
