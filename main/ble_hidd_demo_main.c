@@ -382,6 +382,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
     case ESP_HIDD_EVENT_DEINIT_FINISH:
         break;
     case ESP_HIDD_EVENT_BLE_CONNECT: {
+        esp_err_t err = ESP_OK;
         ESP_LOGI(HID_DEMO_TAG, "ESP_HIDD_EVENT_BLE_CONNECT");
 
         for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS;i++)
@@ -401,11 +402,15 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
 		//to use a very low connection interval.
 		esp_ble_conn_update_params_t new;
 		memcpy(new.bda,param->connect.remote_bda,sizeof(esp_bd_addr_t));
-		new.min_int = 1000;
-		new.max_int = 1000;
-		new.latency = 0x100;
-		new.timeout = 1000;
-		esp_ble_gap_update_conn_params(&new);
+		new.min_int = 80;
+		new.max_int = 80;
+		new.latency = 0;
+		new.timeout = 800;
+		err = esp_ble_gap_update_conn_params(&new);
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(HID_DEMO_TAG, "Failed to set BLE GAP params, err=%d", err);
+        }
 
         // We don't need connections anymore. Stop
         esp_ble_gap_stop_advertising();
