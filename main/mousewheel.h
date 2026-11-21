@@ -12,6 +12,8 @@
 * Included Files
 ****************************************************************************/
 
+#include <stdint.h>
+
 /****************************************************************************
 * Pre-processor Definitions
 ****************************************************************************/
@@ -48,6 +50,12 @@ void mousewheel_init(void);
  * @returns next direction for the mouse (number of clicks)
  */
 int32_t mousewheel_loop(void);
+
+/**
+ * @returns the timestamp for the last action. Used for checking on the
+ * deep-sleep timeout.
+ */
+uint64_t mousewheel_last_action_timestamp_us(void);
 
 /****************************************************************************
  * Inline Functions

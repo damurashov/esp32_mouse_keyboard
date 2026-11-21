@@ -43,6 +43,7 @@ static struct
     int pending_neg;
     int32_t dir;
 } s_enc = {};
+static uint64_t s_last_timestamp_us = 0;
 
 /****************************************************************************
  * Public Data
@@ -64,6 +65,7 @@ int get_b_lvl(void)
 
 static void thumbwheel_isr(void *arg)
 {
+    s_last_timestamp_us = syswrap_get_upttime_us();
 
     /* 3 things must happen:
      * - A MUST trigger,
@@ -130,6 +132,7 @@ void mousewheel_init(void)
     gpio_isr_handler_add(THUMBWHEEL_PIN_ENCODER_B, thumbwheel_isr, (void *)-1);
 
     esp_log_level_set(MOUSEWHEEL_TAG, ESP_LOG_VERBOSE);
+
 }
 
 int32_t mousewheel_loop(void)
@@ -141,4 +144,9 @@ int32_t mousewheel_loop(void)
         MOUSEWHEEL_LOGD("Wheel: %d", ret);
     }
     return ret;
+}
+
+uint64_t mousewheel_last_action_timestamp_us(void)
+{
+    return s_last_timestamp_us;
 }
