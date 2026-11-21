@@ -412,7 +412,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
             ESP_LOGE(HID_DEMO_TAG, "Failed to set BLE GAP params, err=%d", err);
         }
 
-        // We don't need connections anymore. Stop
+        // We don't need connections anymore. Stop advertising
         esp_ble_gap_stop_advertising();
 
         //xEventGroupClearBits(eventgroup_system,SYSTEM_CURRENTLY_ADVERTISING);
