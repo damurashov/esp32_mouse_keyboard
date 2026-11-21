@@ -7,6 +7,7 @@ idf_component_register(SRCS
         "pwr.c"
         "syswrap.c"
         "hmi.c"
+        "cli.c"
         INCLUDE_DIRS
         "."
         REQUIRES
