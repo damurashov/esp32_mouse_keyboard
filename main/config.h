@@ -3,6 +3,7 @@
 #define _CONFIG_H_
 
 #define THUMBWHEEL_USER_INACTIVE_DEEP_SLEEP_TIMEOUT_US (5 * 60ULL * 1000000ULL)
+#define THUMBWHEEL_USE_CONSOLE (0)
 #define MODULE_ID "ESP32miniBT_v0.4.0"
 
 #if CONFIG_USE_AS_FLIPMOUSE_FABI
@@ -15,6 +16,8 @@
 	#define EX_UART_NUM     	 CONFIG_MODULE_UART_NR
 	#define GATTS_TAG "esp32_mouse_keyboard"
 #endif
+
+#define MOUSE_SPEED 30
 
 #define MAX_BT_DEVICENAME_LENGTH 40
 
