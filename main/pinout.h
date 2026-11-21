@@ -23,8 +23,8 @@
 	#define EX_SERIAL_RXPIN      CONFIG_MODULE_RX_PIN
 #endif
 
-#define THUMBWHEEL_PIN_ENCODER_A (39ULL)
-#define THUMBWHEEL_PIN_ENCODER_B (40ULL)
+#define THUMBWHEEL_PIN_ENCODER_A (6ULL)
+#define THUMBWHEEL_PIN_ENCODER_B (7ULL)
 
 /****************************************************************************
 * Public Types
