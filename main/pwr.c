@@ -100,7 +100,7 @@ static inline void enter_deep_sleep(void)
 static inline int is_user_idle(void)
 {
     const uint64_t now = syswrap_get_upttime_us();
-    if (now < hmi_last_user_action_timestamp_us() + THUMBWHEEL_USER_INACTIVE_TIMEOUT_US)
+    if (now < hmi_last_user_action_timestamp_us() + THUMBWHEEL_USER_INACTIVE_DEEP_SLEEP_TIMEOUT_US)
     {
         return 0;
     }
