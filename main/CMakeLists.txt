@@ -6,6 +6,7 @@ idf_component_register(SRCS
         "mousewheel.c"
         "pwr.c"
         "syswrap.c"
+        "hmi.c"
         INCLUDE_DIRS
         "."
         REQUIRES

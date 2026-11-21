@@ -2,6 +2,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#define THUMBWHEEL_USER_INACTIVE_DEEP_SLEEP_TIMEOUT_US (5 * 60ULL * 1000000ULL)
 #define MODULE_ID "ESP32miniBT_v0.4.0"
 
 #if CONFIG_USE_AS_FLIPMOUSE_FABI
@@ -19,6 +20,8 @@
 
 // serial port of monitor and for debugging (not in KConfig, won't be changed normally)
 #define CONSOLE_UART_NUM 	 UART_NUM_0
+
+#include <stdint.h>
 
 typedef struct config_data {
     char bt_device_name[MAX_BT_DEVICENAME_LENGTH];
