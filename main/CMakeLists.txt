@@ -1,8 +1,10 @@
-idf_component_register(SRCS "ble_hidd_demo_main.c"
+idf_component_register(SRCS
+        "ble_hidd_demo_main.c"
         "esp_hidd_prf_api.c"
         "hid_dev.c"
         "hid_device_le_prf.c"
         "mousewheel.c"
+        "pwr.c"
         "syswrap.c"
         INCLUDE_DIRS
         "."

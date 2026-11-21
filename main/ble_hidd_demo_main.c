@@ -45,6 +45,7 @@
 #include "config.h"
 #include "mousewheel.h"
 #include "pinout.h"
+#include "pwr.h"
 #include <driver/gpio.h>
 #include <driver/uart.h>
 #include <esp_bt.h>
@@ -381,6 +382,7 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
     case ESP_HIDD_EVENT_DEINIT_FINISH:
         break;
     case ESP_HIDD_EVENT_BLE_CONNECT: {
+        esp_err_t err = ESP_OK;
         ESP_LOGI(HID_DEMO_TAG, "ESP_HIDD_EVENT_BLE_CONNECT");
 
         for(uint8_t i = 0; i<CONFIG_BT_ACL_CONNECTIONS;i++)
@@ -400,14 +402,19 @@ static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *
 		//to use a very low connection interval.
 		esp_ble_conn_update_params_t new;
 		memcpy(new.bda,param->connect.remote_bda,sizeof(esp_bd_addr_t));
-		new.min_int = 6;
-		new.max_int = 6;
+		new.min_int = 80;
+		new.max_int = 80;
 		new.latency = 0;
-		new.timeout = 500;
-		esp_ble_gap_update_conn_params(&new);
+		new.timeout = 800;
+		err = esp_ble_gap_update_conn_params(&new);
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(HID_DEMO_TAG, "Failed to set BLE GAP params, err=%d", err);
+        }
 
-        //to allow more connections, we simply restart the adv process.
-        esp_ble_gap_start_advertising(&hidd_adv_params);
+        // We don't need connections anymore. Stop
+        esp_ble_gap_stop_advertising();
+
         //xEventGroupClearBits(eventgroup_system,SYSTEM_CURRENTLY_ADVERTISING);
         break;
     }
@@ -1511,6 +1518,8 @@ void app_main(void)
 {
     esp_err_t ret;
 
+    pwr_init();
+
     //set external UART number according to setup
     //and setup anything pin related.
     #if CONFIG_USE_AS_FLIPMOUSE_FABI
@@ -1566,6 +1575,11 @@ void app_main(void)
         ESP_LOGE(HID_DEMO_TAG, "%s initialize controller failed\n", __func__);
         return;
     }
+
+    /* Set BLE transmit power for various cases (`_N0` means 0 dBm)*/
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_N0);
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_N0);
+    esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_N0);
 
     ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
     if (ret) {
@@ -1667,14 +1681,6 @@ void app_main(void)
     esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, sizeof(uint8_t));
     esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t));
 
-    //start active scan
-    //if(esp_ble_gap_set_scan_params(&scan_params) != ESP_OK) ESP_LOGE("MAIN","Cannot set scan params");
-    //a console for HID debugging (sending simple mouse/kbd commands) is not available on Arduino RP2040 Connect.
-    #if CONFIG_MODULE_MINIBT
-      xTaskCreate(&uart_console_task,  "console", 4096, NULL, configMAX_PRIORITIES-1, NULL);
-    #endif
-    xTaskCreate(&uart_external_task, "external", 4096, NULL, configMAX_PRIORITIES-1, NULL);
-
     //start periodic timer to send HID reports
     const esp_timer_create_args_t periodic_timer_args = {
             .callback = &periodicHIDCallback,
@@ -1691,7 +1697,8 @@ void app_main(void)
     while (1)
     {
         main_loop();
-        vTaskDelay(1);
+        pwr_loop();
+        vTaskDelay(5);
     }
 
     //avoid unused variable warnings here:
