@@ -1259,27 +1259,6 @@ void uart_external_task(void *pvParameters)
     }
 }
 
-void blink_task(void *pvParameter)
-{
-    // Initialize GPIO pins
-    //gpio_pad_select_gpio(indicator_led);
-    gpio_set_direction(indicator_led, GPIO_MODE_OUTPUT);
-    int blinkTime;
-
-    while(1) {
-
-        if (isConnected()) blinkTime=1000;
-        else blinkTime=250;
-
-        /* Blink off (output low) */
-        gpio_set_level(indicator_led, 0);
-        vTaskDelay(blinkTime / portTICK_PERIOD_MS);
-        /* Blink on (output high) */
-        gpio_set_level(indicator_led, 1);
-        vTaskDelay(blinkTime / portTICK_PERIOD_MS);
-    }
-}
-
 //#if CONFIG_MODULE_NANO
 
 int uart_vprintf_valid = 0;
